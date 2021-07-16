@@ -1,5 +1,7 @@
 package model;
 
+import java.util.ArrayList;
+
 public class Wallet {
 
     public static final int CAPACIDAD_MAXIMA= 1000000; 
@@ -9,11 +11,20 @@ public class Wallet {
     
     private int saldo;
     private boolean tieneLimite; //si la billetera tiene limite no va a poderse guardar el saldo
+    private int meta;
+
+    /**
+     * Listas
+     */
+
+     private ArrayList <Transaction> movimientos;
 
     public Wallet() {
         super();
         saldo=0;
         tieneLimite=true;
+        meta=0;
+        movimientos = new ArrayList<>();
     }
 
     //obtener los datos si son privados y de esta forma cambiarlo
@@ -43,26 +54,37 @@ public class Wallet {
     // verificamos si la biletera tiene un limite, si excede el limite no se puede guardar.
     // si estoy pasando el limite debo sumar el saldo mas el valor que llega y verificar que no exceda la capacidad maxima
         
+    public boolean verificarMeta(){
+        if(meta == 0 || saldo < meta){
+            return false;
+        }
+        return true;
+    }
 
     public String saveMoney(int value){
         if (saldo + value > CAPACIDAD_MAXIMA && tieneLimite) {
             return"No se puede superar el limite" + CAPACIDAD_MAXIMA;
         }
         saldo+=value; // saldo = saldo + value
-        
+        Transaction ingreso = new Transaction(value,"hoy",1,"Ingreso de Dinero");
+        movimientos.add(ingreso);
+        if(verificarMeta()){System.out.println("Has cumplido la meta");}
         return "Transaccion exitosa, su nuevo saldo" + saldo;
     }
+    
     
 
     //Retirar dinero
     // que me diga q no excede mi saldo y q despues me muestre mi nuevo saldo que me queda
     
     public String takeMoney(int value){
+        
         if (saldo <= value) {
+            Transaction retiro = new Transaction(value,"hoy",2,"Retiro de Dinero");
+            movimientos.add(retiro);
             return"Saldo Insuficiente ";
         }
         saldo-=value; // saldo = saldo - value
-        
         return "Transaccion exitosa, su nuevo saldo " + saldo;
     
     }
@@ -72,10 +94,12 @@ public class Wallet {
     public String breakLimit(){
         if (!tieneLimite) {
             return "Tu cuenta no tiene limites! ";
-                    }
+                         }
         if (saldo >= 10000) {
             saldo -= 10000; // Se restan los 10mil para poder romper los limites
             setTieneLimite(false); //o tambien se puede hacer con tieneLimite = false;
+            Transaction limites = new Transaction(1000, "hoy", 2, "Romper Limites");
+            movimientos.add(limites);
             return"Transacción Exitosa, has roto los limites ";
         }           
         return "Saldo insuficiente para realizar la transacción ";
@@ -89,6 +113,13 @@ public class Wallet {
             return "la primera cuenta es mayor";
         }
         return "La segunda cuenta es mayor";
+        
+    }
+
+    public void displayMovimientos() {
+        for (Transaction movimiento : movimientos){
+            System.out.println(movimiento);
+        }
         
     }
 }
